@@ -32,7 +32,6 @@ export class GameSessionsSystem {
 
     const player = this.gamePlayersLoader.loadPlayerEntity(sessionId);
 
-    CreateEntity(player);
     SetSessionData(sessionId, 'playerId', player.id);
     SetSessionData(sessionId, 'chunkId', player.chunkId);
   }

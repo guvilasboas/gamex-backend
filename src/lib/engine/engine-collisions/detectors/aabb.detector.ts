@@ -20,24 +20,24 @@ export class AabbDetector implements ICollisionDetector {
     const halfB = colliderB.size.clone().multiplyScalar(0.5);
 
     const dx = posA.x - posB.x;
-    const dz = posA.z - posB.z;
+    const dy = posA.y - posB.y;
 
     const overlapX = halfA.x + halfB.x - Math.abs(dx);
-    const overlapZ = halfA.z + halfB.z - Math.abs(dz);
+    const overlapY = halfA.y + halfB.y - Math.abs(dy);
 
-    if (overlapX <= 0 || overlapZ <= 0) {
+    if (overlapX <= 0 || overlapY <= 0) {
       return null;
     }
 
     let normal: Vector3;
     let depth: number;
 
-    if (overlapX < overlapZ) {
+    if (overlapX < overlapY) {
       depth = overlapX;
       normal = new Vector3(dx < 0 ? 1 : -1, 0, 0);
     } else {
-      depth = overlapZ;
-      normal = new Vector3(0, 0, dz < 0 ? 1 : -1);
+      depth = overlapY;
+      normal = new Vector3(0, dy < 0 ? 1 : -1, 0);
     }
 
     return {
@@ -45,7 +45,7 @@ export class AabbDetector implements ICollisionDetector {
       entityB,
       colliderA,
       colliderB,
-      overlap: new Vector3(overlapX, 0, overlapZ),
+      overlap: new Vector3(overlapX, overlapY, 0),
       normal,
       depth,
     };

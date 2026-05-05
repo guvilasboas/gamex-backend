@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { Vector3 } from 'three';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EngineEntitiesRegistry, Entity } from '../engine-entities';
 import { EngineChunksRegistry } from '../engine-chunks';
@@ -104,6 +105,58 @@ export class EngineCollisionsManager {
         } satisfies CollisionExitPayload);
       }
     }
+  }
+
+  /**
+   * Speculatively checks whether moving entityId to futurePosition would cause
+   * a collision with any other collidable entity in the same chunk neighbourhood.
+   */
+  wouldCollideAt(entityId: string, futurePosition: Vector3): boolean {
+    const entity = this.entitiesRegistry.get(entityId);
+    if (!entity) return false;
+
+    const collidersA = this.collidersRegistry
+      .getByEntity(entityId)
+      .filter((c) => c.enabled);
+    if (collidersA.length === 0) return false;
+
+    const chunk = this.chunksRegistry.get(entity.chunkId);
+    if (!chunk) return false;
+
+    const entityIds = new Set([
+      ...Array.from(chunk.entities),
+      ...this.getNeighboringEntityIds(chunk.neighboringChunkIds),
+    ]);
+
+    const candidates = Array.from(entityIds)
+      .filter((id) => id !== entityId)
+      .map((id) => this.entitiesRegistry.get(id))
+      .filter(
+        (e): e is Entity => e !== undefined && e.tags.includes('collidable'),
+      );
+
+    // Simulate the entity at its future position without mutating the real object
+    const futureEntity = { ...entity, position: futurePosition } as Entity;
+
+    for (const entityB of candidates) {
+      const collidersB = this.collidersRegistry
+        .getByEntity(entityB.id)
+        .filter((c) => c.enabled);
+      if (collidersB.length === 0) continue;
+
+      for (const colliderA of collidersA) {
+        for (const colliderB of collidersB) {
+          if (!this.colliderPassesFilter(colliderA, colliderB)) continue;
+          if (
+            this.detector.detect(futureEntity, colliderA, entityB, colliderB)
+          ) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
   }
 
   private broadPhase(): [Entity, Entity][] {

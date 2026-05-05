@@ -4,12 +4,27 @@ import { createActionEvent } from '../../lib/engine/engine-sessions';
 import { Vector3 } from 'three';
 import { type MoveAction, MoveActionPayload } from './game-players.actions';
 import { GetEntity, UpdateEntity } from '../../lib/engine/engine-entities';
+import {
+  type CollisionManifold,
+  ENGINE_COLLISION_ENTER_EVENT,
+  WouldCollideAt,
+} from '../../lib/engine/engine-collisions';
 
 const WALKING_TAG = 'walking';
 const IDLE_TAG = 'idle';
 
 @Injectable()
 export class GamePlayersSystem {
+  @OnEvent(ENGINE_COLLISION_ENTER_EVENT)
+  onCollision(manifold: CollisionManifold) {
+    console.log(
+      'Collision detected between',
+      manifold.entityA.id,
+      'and',
+      manifold.entityB.id,
+    );
+  }
+
   @OnEvent(createActionEvent('move'))
   onMoveAction(action: MoveAction) {
     const velocity = this.getVelocityFromDirection(action.action);
@@ -23,7 +38,11 @@ export class GamePlayersSystem {
     this.syncMovementTags(player, isMoving);
 
     if (isMoving) {
-      player.move(velocity.multiplyScalar(5));
+      const delta = velocity.clone().multiplyScalar(5);
+      const futurePosition = player.position.clone().add(delta);
+      if (!WouldCollideAt(player.id, futurePosition)) {
+        player.move(delta);
+      }
     }
 
     UpdateEntity(player);

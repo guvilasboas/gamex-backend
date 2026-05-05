@@ -2,6 +2,7 @@ import { Vector3 } from 'three';
 import { Container } from '../../../common/container';
 import { EngineCollisionsRegistry } from './engine-collisions.registry';
 import { EngineCollidersRegistry } from './engine-colliders.registry';
+import { EngineCollisionsManager } from './engine-collisions.manager';
 import { Collider } from './collider';
 import {
   CollisionManifold,
@@ -82,6 +83,22 @@ export function AreCollidersColliding(
   return registry.has(
     createCollisionPairKey(entityAId, colliderAId, entityBId, colliderBId),
   );
+}
+
+// ─── Speculative collision check ─────────────────────────────────────────────
+
+/**
+ * Returns true if moving the entity to futurePosition would cause a collision
+ * with any other collidable entity in the surrounding chunks.
+ */
+export function WouldCollideAt(
+  entityId: string,
+  futurePosition: Vector3,
+): boolean {
+  const manager = Container.get<EngineCollisionsManager>(
+    EngineCollisionsManager,
+  );
+  return manager.wouldCollideAt(entityId, futurePosition);
 }
 
 // ─── Collision filters ────────────────────────────────────────────────────────
