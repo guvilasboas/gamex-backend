@@ -112,6 +112,7 @@ export function AttachComponent<T extends Component>(
   params: Partial<T> & { id: string },
 ): T {
   const component = ComponentFactory.create(componentClass, params);
+
   return AddComponent(entityId, component);
 }
 

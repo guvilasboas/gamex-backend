@@ -4,10 +4,14 @@ import { EngineChunksRegistry } from '../engine-chunks';
 import { instanceToPlain } from 'class-transformer';
 import { EngineSessionsRegistry } from '../engine-sessions';
 import { EngineCollisionsRegistry } from '../engine-collisions';
+import { EngineEntitiesComponentsRegistry } from '../engine-entities/engine-entities-components';
+import { IsRenderable } from '../engine-render';
 
 @Injectable()
 export class EngineDebug {
   constructor(
+    @Inject(EngineEntitiesComponentsRegistry)
+    private readonly componentsRegistry: EngineEntitiesComponentsRegistry,
     @Inject(EngineCollisionsRegistry)
     private readonly collisionsRegistry: EngineCollisionsRegistry,
     @Inject(EngineSessionsRegistry)
@@ -25,6 +29,7 @@ export class EngineDebug {
    */
   getDebugInfo() {
     return {
+      components: this.getComponentsState(),
       collisions: this.getCollisionsInfo(),
       sessions: this.getSessionsInfo(),
       entities: this.getEntitiesInfo(),
@@ -71,5 +76,20 @@ export class EngineDebug {
   private getCollisionsInfo() {
     const collisions = this.collisionsRegistry.getAll();
     return collisions.map((collision) => instanceToPlain(collision));
+  }
+
+  /**
+   * Get the current state of all renderable components in the engine store.
+   *
+   * @returns An array of renderable component objects.
+   */
+  private getComponentsState() {
+    const entities = this.entitiesRegistry.getAll();
+
+    const components = entities.flatMap((entity) =>
+      this.componentsRegistry.getAll(entity.id),
+    );
+
+    return components.filter(IsRenderable).map((i) => instanceToPlain(i));
   }
 }

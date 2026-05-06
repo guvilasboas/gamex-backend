@@ -6,11 +6,7 @@ import {
   SetSessionData,
 } from '../../lib/engine/engine-sessions';
 import { GamePlayersLoader } from '../game-players/game-players.loader';
-import {
-  GetEntity,
-  CreateEntity,
-  RemoveEntity,
-} from '../../lib/engine/engine-entities';
+import { GetEntity, RemoveEntity } from '../../lib/engine/engine-entities';
 
 @Injectable()
 export class GameSessionsSystem {

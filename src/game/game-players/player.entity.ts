@@ -2,7 +2,7 @@ import { Vector3 } from 'three';
 import { Entity } from '../../lib/engine/engine-entities';
 import { random } from 'lodash';
 
-export class GamePlayer extends Entity {
+export class Player extends Entity {
   /**
    * The type of the entity, which is set to 'player' for game players.
    *

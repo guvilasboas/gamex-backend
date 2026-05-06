@@ -41,17 +41,6 @@ export class ColliderComponent extends Component {
    */
   enabled: boolean = true;
 
-  constructor(
-    params: Partial<ColliderComponent> & {
-      id: string;
-      entityId: string;
-      size: Vector3;
-    },
-  ) {
-    super({ id: params.id });
-    Object.assign(this, params);
-  }
-
   /**
    * Computes the world position of the collider based on the entity's position and the collider's offset.
    *
