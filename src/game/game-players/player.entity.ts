@@ -1,26 +1,19 @@
 import { Vector3 } from 'three';
 import { Entity } from '../../lib/engine/engine-entities';
+import { EntityDef, WithComponent } from '../../lib/engine/engine-decorators';
+import { ColliderComponent } from '../../lib/engine/engine-collisions';
+import { AnimationComponent } from '../../lib/engine/engine-render';
 import { random } from 'lodash';
 
+@EntityDef({ type: 'player' })
+@WithComponent(ColliderComponent, {
+  id: 'body',
+  size: new Vector3(64, 24, 0),
+  tags: ['player'],
+})
+@WithComponent(AnimationComponent, { id: 'animation' })
 export class Player extends Entity {
-  /**
-   * The type of the entity, which is set to 'player' for game players.
-   *
-   * @type {string}
-   */
-  type = 'player';
-
-  /**
-   * The size of the player entity, which is set to a default value of (30, 60, 0).
-   *
-   * @type {Vector3}
-   */
   size = new Vector3(64, 96, 0);
 
-  /**
-   * The initial position of the player entity, which is set to a random value within a 500x500 area.
-   *
-   * @type {Vector3}
-   */
   position = new Vector3(random(0, 500), random(0, 500), 0);
 }

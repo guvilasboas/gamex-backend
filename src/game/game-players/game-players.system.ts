@@ -6,16 +6,16 @@ import { type MoveAction, MoveActionPayload } from './game-players.actions';
 import { GetEntity, UpdateEntity } from '../../lib/engine/engine-entities';
 import {
   type CollisionManifold,
-  ENGINE_COLLISION_ENTER_EVENT,
   WouldCollideAt,
 } from '../../lib/engine/engine-collisions';
+import { OnCollisionEnter } from '../../lib/engine/engine-decorators';
 
 const WALKING_TAG = 'walking';
 const IDLE_TAG = 'idle';
 
 @Injectable()
 export class GamePlayersSystem {
-  @OnEvent(ENGINE_COLLISION_ENTER_EVENT)
+  @OnCollisionEnter()
   onCollision(manifold: CollisionManifold) {
     console.log(
       'Collision detected between',
