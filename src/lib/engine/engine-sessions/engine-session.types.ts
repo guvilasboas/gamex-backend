@@ -1,3 +1,5 @@
+import { OnEvent } from '@nestjs/event-emitter';
+
 export type SessionAction = {
   type: string;
   [key: string]: unknown;
@@ -29,3 +31,7 @@ export const createSession = (data: Partial<Session>): Session => {
 export const createActionEvent = (actionType: string) => {
   return `session.action.${actionType}`;
 };
+
+export function OnAction(actionType: string) {
+  return OnEvent(createActionEvent(actionType));
+}

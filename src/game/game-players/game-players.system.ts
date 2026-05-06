@@ -1,31 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { OnEvent } from '@nestjs/event-emitter';
-import { createActionEvent } from '../../lib/engine/engine-sessions';
+import { OnAction } from '../../lib/engine/engine-sessions';
 import { Vector3 } from 'three';
 import { type MoveAction, MoveActionPayload } from './game-players.actions';
 import { GetEntity, UpdateEntity } from '../../lib/engine/engine-entities';
-import {
-  type CollisionManifold,
-  WouldCollideAt,
-} from '../../lib/engine/engine-collisions';
-import { OnCollisionEnter } from '../../lib/engine/engine-decorators';
+import { WouldCollideAt } from '../../lib/engine/engine-collisions';
 
 const WALKING_TAG = 'walking';
 const IDLE_TAG = 'idle';
 
 @Injectable()
 export class GamePlayersSystem {
-  @OnCollisionEnter()
-  onCollision(manifold: CollisionManifold) {
-    console.log(
-      'Collision detected between',
-      manifold.entityA.id,
-      'and',
-      manifold.entityB.id,
-    );
-  }
-
-  @OnEvent(createActionEvent('move'))
+  @OnAction('move')
   onMoveAction(action: MoveAction) {
     const velocity = this.getVelocityFromDirection(action.action);
     const isMoving = velocity.lengthSq() > 0;
