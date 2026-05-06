@@ -42,10 +42,20 @@ export class EngineStoreState {
     const entities = this.engineEntitiesManager.getAll();
 
     const components = entities.flatMap((entity) =>
-      this.engineEntitiesComponentsManager.getAll(entity.id),
+      this.engineEntitiesComponentsManager
+        .getAll(entity.id)
+        .map((component) => ({
+          component,
+          entity,
+        })),
     );
 
-    return components.filter(IsRenderable).map((i) => instanceToPlain(i));
+    return components
+      .filter(({ component }) => IsRenderable(component))
+      .map(({ component, entity }) => ({
+        ...instanceToPlain(component),
+        position: component.getWorldPosition(entity.position),
+      }));
   }
 
   /**

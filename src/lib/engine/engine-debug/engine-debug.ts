@@ -87,9 +87,17 @@ export class EngineDebug {
     const entities = this.entitiesRegistry.getAll();
 
     const components = entities.flatMap((entity) =>
-      this.componentsRegistry.getAll(entity.id),
+      this.componentsRegistry.getAll(entity.id).map((component) => ({
+        component,
+        entity,
+      })),
     );
 
-    return components.filter(IsRenderable).map((i) => instanceToPlain(i));
+    return components
+      .filter(({ component }) => IsRenderable(component))
+      .map(({ component, entity }) => ({
+        ...instanceToPlain(component),
+        position: component.getWorldPosition(entity.position),
+      }));
   }
 }
