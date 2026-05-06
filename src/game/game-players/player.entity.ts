@@ -2,11 +2,8 @@ import { Vector3 } from 'three';
 import { Entity } from '../../lib/engine/engine-entities';
 import { EntityDef, WithComponent } from '../../lib/engine/engine-decorators';
 import { ColliderComponent } from '../../lib/engine/engine-collisions';
-import {
-  AnimationComponent,
-  RectComponent,
-} from '../../lib/engine/engine-render';
-import { random } from 'lodash';
+import { RectComponent } from '../../lib/engine/engine-render';
+import { random, uniqueId } from 'lodash';
 
 @EntityDef({ type: 'player' })
 @WithComponent(ColliderComponent, {
@@ -15,7 +12,7 @@ import { random } from 'lodash';
   tags: ['player'],
 })
 @WithComponent(RectComponent, {
-  id: 'player-react',
+  id: uniqueId('player-rect'),
   size: new Vector3(64, 96, 0),
 })
 export class Player extends Entity {

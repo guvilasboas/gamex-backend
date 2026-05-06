@@ -1,5 +1,7 @@
 import { Vector2, Vector3 } from 'three';
 import { Sync } from '../../engine-decorators';
+import { Entity } from '../entity';
+import { instanceToPlain } from 'class-transformer';
 
 export abstract class Component {
   static readonly type: string;
@@ -143,5 +145,18 @@ export abstract class Component {
    */
   getWorldPosition(entityPosition: Vector3): Vector3 {
     return entityPosition.clone().add(this.offset);
+  }
+
+  /**
+   * Serializes the component to a JSON-friendly format, including the world position of the collider.
+   *
+   * @param {Entity} entity - The entity this component belongs to, used to calculate the world position.
+   * @returns {object} A JSON-serializable representation of the component.
+   */
+  getJson(entity: Entity) {
+    return {
+      ...instanceToPlain(this),
+      position: this.getWorldPosition(entity.position),
+    };
   }
 }

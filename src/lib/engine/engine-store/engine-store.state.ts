@@ -50,12 +50,17 @@ export class EngineStoreState {
         })),
     );
 
-    return components
-      .filter(({ component }) => IsRenderable(component))
-      .map(({ component, entity }) => ({
-        ...instanceToPlain(component),
-        position: component.getWorldPosition(entity.position),
-      }));
+    const renderableComponents = components.filter(({ component }) =>
+      IsRenderable(component),
+    );
+
+    const componentsMap = {};
+
+    for (const { component, entity } of renderableComponents) {
+      set(componentsMap, component.id, component.getJson(entity));
+    }
+
+    return componentsMap;
   }
 
   /**

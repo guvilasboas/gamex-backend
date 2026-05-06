@@ -44,7 +44,7 @@ export class EngineStoreSystem {
       this.engineStoreManager.patch({
         type: 'set',
         key: `components.${component.id}`,
-        value: component,
+        value: component.getJson(entity),
       });
     }
   }
@@ -71,11 +71,18 @@ export class EngineStoreSystem {
       .getAll(entity.id)
       .filter(IsRenderable);
 
+    console.log(
+      '[DEV] EngineStoreSystem.onEngineEntityUpdated - Updated entity with ID:',
+      entity.id,
+      'and its renderable components:',
+      components.map((c) => c.id),
+    );
+
     for (const component of components) {
       this.engineStoreManager.patch({
         type: 'set',
         key: `components.${component.id}`,
-        value: component,
+        value: component.getJson(entity),
       });
     }
   }
