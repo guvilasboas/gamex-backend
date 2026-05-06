@@ -16,4 +16,6 @@ export class Player extends Entity {
   size = new Vector3(64, 96, 0);
 
   position = new Vector3(random(0, 500), random(0, 500), 0);
+
+  speed = 5;
 }

@@ -4,6 +4,8 @@ import { Vector3 } from 'three';
 import { type MoveAction, MoveActionPayload } from './game-players.actions';
 import { GetEntity, UpdateEntity } from '../../lib/engine/engine-entities';
 import { WouldCollideAt } from '../../lib/engine/engine-collisions';
+import { GetVectorFromDirections } from '../../lib/engine/engine-physics';
+import { Player } from './player.entity';
 
 const WALKING_TAG = 'walking';
 const IDLE_TAG = 'idle';
@@ -12,10 +14,10 @@ const IDLE_TAG = 'idle';
 export class GamePlayersSystem {
   @OnAction('move')
   onMoveAction(action: MoveAction) {
-    const velocity = this.getVelocityFromDirection(action.action);
+    const velocity = GetVectorFromDirections(action.action);
     const isMoving = velocity.lengthSq() > 0;
 
-    const player = GetEntity(action.sessionId);
+    const player = GetEntity<Player>(action.sessionId);
     if (!player) {
       return;
     }
@@ -23,7 +25,7 @@ export class GamePlayersSystem {
     this.syncMovementTags(player, isMoving);
 
     if (isMoving) {
-      const delta = velocity.clone().multiplyScalar(5);
+      const delta = velocity.clone().multiplyScalar(player.speed);
       const futurePosition = player.position.clone().add(delta);
       if (!WouldCollideAt(player.id, futurePosition)) {
         player.move(delta);
@@ -50,28 +52,5 @@ export class GamePlayersSystem {
 
     player.addTag(IDLE_TAG);
     player.removeTag(WALKING_TAG);
-  }
-
-  private getVelocityFromDirection(direction: MoveActionPayload) {
-    const velocity = { x: 0, y: 0 };
-
-    if (direction.up) {
-      velocity.y -= 1;
-    }
-    if (direction.down) {
-      velocity.y += 1;
-    }
-    if (direction.left) {
-      velocity.x -= 1;
-    }
-    if (direction.right) {
-      velocity.x += 1;
-    }
-
-    const v = new Vector3(velocity.x, velocity.y, 0);
-    if (v.lengthSq() > 0) {
-      v.normalize();
-    }
-    return v;
   }
 }
