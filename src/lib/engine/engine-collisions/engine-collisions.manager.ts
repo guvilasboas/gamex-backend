@@ -108,8 +108,8 @@ export class EngineCollisionsManager {
   }
 
   /**
-   * Speculatively checks whether moving entityId to futurePosition would cause
-   * a collision with any other collidable entity in the same chunk neighbourhood.
+   * Checks if an entity would collide with any collidable entities at a given future position.
+   * Useful for movement prediction and collision avoidance.
    */
   wouldCollideAt(entityId: string, futurePosition: Vector3): boolean {
     const entity = this.entitiesRegistry.get(entityId);
