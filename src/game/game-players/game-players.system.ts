@@ -83,6 +83,10 @@ export class GamePlayersSystem {
       velocity.x += 1;
     }
 
-    return new Vector3(velocity.x, velocity.y, 0);
+    const v = new Vector3(velocity.x, velocity.y, 0);
+    if (v.lengthSq() > 0) {
+      v.normalize();
+    }
+    return v;
   }
 }
