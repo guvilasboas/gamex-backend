@@ -3,18 +3,13 @@ import { EngineEntitiesRegistry } from '../engine-entities';
 import { EngineChunksRegistry } from '../engine-chunks';
 import { instanceToPlain } from 'class-transformer';
 import { EngineSessionsRegistry } from '../engine-sessions';
-import {
-  EngineCollidersRegistry,
-  EngineCollisionsRegistry,
-} from '../engine-collisions';
+import { EngineCollisionsRegistry } from '../engine-collisions';
 
 @Injectable()
 export class EngineDebug {
   constructor(
     @Inject(EngineCollisionsRegistry)
     private readonly collisionsRegistry: EngineCollisionsRegistry,
-    @Inject(EngineCollidersRegistry)
-    private readonly collidersRegistry: EngineCollidersRegistry,
     @Inject(EngineSessionsRegistry)
     private readonly sessionsRegistry: EngineSessionsRegistry,
     @Inject(EngineEntitiesRegistry)
@@ -30,10 +25,7 @@ export class EngineDebug {
    */
   getDebugInfo() {
     return {
-      collisions: {
-        colliders: this.getCollidersInfo(),
-        collisions: this.getCollisionsInfo(),
-      },
+      collisions: this.getCollisionsInfo(),
       sessions: this.getSessionsInfo(),
       entities: this.getEntitiesInfo(),
       chunks: this.getChunksInfo(),
@@ -69,16 +61,6 @@ export class EngineDebug {
   private getChunksInfo() {
     const chunks = this.chunksRegistry.getAll();
     return chunks.map((chunk) => instanceToPlain(chunk));
-  }
-
-  /**
-   * Retrieves information about all colliders in the engine.
-   *
-   * @returns An array of plain objects representing the colliders.
-   */
-  private getCollidersInfo() {
-    const colliders = this.collidersRegistry.getAll();
-    return colliders.map((collider) => instanceToPlain(collider));
   }
 
   /**

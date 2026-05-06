@@ -1,9 +1,14 @@
 import { Vector3 } from 'three';
 import { Container } from '../../../common/container';
 import { EngineCollisionsRegistry } from './engine-collisions.registry';
-import { EngineCollidersRegistry } from './engine-colliders.registry';
 import { EngineCollisionsManager } from './engine-collisions.manager';
-import { Collider } from './collider';
+import { ColliderComponent } from './collider.component';
+import {
+  AttachComponent,
+  GetComponentsByType,
+  PatchComponent,
+  RemoveComponent,
+} from '../engine-entities/engine-entities-components';
 import {
   CollisionManifold,
   createCollisionPairKey,
@@ -12,28 +17,21 @@ import {
 // ─── Collider management ──────────────────────────────────────────────────────
 
 export function AddCollider(
-  params: { id: string; entityId: string; size: Vector3 } & Partial<Collider>,
-): Collider {
-  const registry = Container.get<EngineCollidersRegistry>(
-    EngineCollidersRegistry,
-  );
-  const collider = new Collider(params);
-  registry.add(collider);
-  return collider;
+  params: {
+    id: string;
+    entityId: string;
+    size: Vector3;
+  } & Partial<ColliderComponent>,
+): ColliderComponent {
+  return AttachComponent(params.entityId, ColliderComponent, params as any);
 }
 
 export function RemoveCollider(entityId: string, colliderId: string): void {
-  const registry = Container.get<EngineCollidersRegistry>(
-    EngineCollidersRegistry,
-  );
-  registry.remove(entityId, colliderId);
+  RemoveComponent(entityId, colliderId);
 }
 
-export function GetColliders(entityId: string): Collider[] {
-  const registry = Container.get<EngineCollidersRegistry>(
-    EngineCollidersRegistry,
-  );
-  return registry.getByEntity(entityId);
+export function GetColliders(entityId: string): ColliderComponent[] {
+  return GetComponentsByType(entityId, ColliderComponent);
 }
 
 export function SetColliderEnabled(
@@ -41,15 +39,7 @@ export function SetColliderEnabled(
   colliderId: string,
   enabled: boolean,
 ): void {
-  const registry = Container.get<EngineCollidersRegistry>(
-    EngineCollidersRegistry,
-  );
-  const collider = registry
-    .getByEntity(entityId)
-    .find((c) => c.id === colliderId);
-  if (collider) {
-    collider.enabled = enabled;
-  }
+  PatchComponent(entityId, colliderId, { enabled });
 }
 
 // ─── Collision queries ────────────────────────────────────────────────────────

@@ -1,10 +1,11 @@
 import { Vector3 } from 'three';
+import { Component } from '../engine-entities/engine-entities-components';
 
 export type ColliderShape = 'aabb';
 
-export class Collider {
-  id: string;
-  entityId: string;
+export class ColliderComponent extends Component {
+  static readonly type = 'collider';
+
   offset: Vector3 = new Vector3(0, 0, 0);
   size: Vector3;
   shape: ColliderShape = 'aabb';
@@ -12,8 +13,13 @@ export class Collider {
   enabled: boolean = true;
 
   constructor(
-    params: Partial<Collider> & { id: string; entityId: string; size: Vector3 },
+    params: Partial<ColliderComponent> & {
+      id: string;
+      entityId: string;
+      size: Vector3;
+    },
   ) {
+    super({ id: params.id });
     Object.assign(this, params);
   }
 

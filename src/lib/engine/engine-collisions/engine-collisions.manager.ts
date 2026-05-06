@@ -4,7 +4,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EngineEntitiesRegistry, Entity } from '../engine-entities';
 import { EngineChunksRegistry } from '../engine-chunks';
 import { EngineCollisionsRegistry } from './engine-collisions.registry';
-import { EngineCollidersRegistry } from './engine-colliders.registry';
+import { EngineEntitiesComponentsManager } from '../engine-entities/engine-entities-components';
 import { AabbDetector } from './detectors/aabb.detector';
 import {
   ENGINE_COLLISION_ENTER_EVENT,
@@ -15,7 +15,7 @@ import {
   CollisionPairKey,
   createCollisionPairKey,
 } from './engine-collisions.types';
-import { Collider } from './collider';
+import { ColliderComponent } from './collider.component';
 
 export type CollisionExitPayload = {
   entityAId: string;
@@ -33,8 +33,8 @@ export class EngineCollisionsManager {
     private readonly chunksRegistry: EngineChunksRegistry,
     @Inject(EngineCollisionsRegistry)
     private readonly collisionsRegistry: EngineCollisionsRegistry,
-    @Inject(EngineCollidersRegistry)
-    private readonly collidersRegistry: EngineCollidersRegistry,
+    @Inject(EngineEntitiesComponentsManager)
+    private readonly componentsManager: EngineEntitiesComponentsManager,
     @Inject(AabbDetector)
     private readonly detector: AabbDetector,
     @Inject(EventEmitter2)
@@ -45,11 +45,11 @@ export class EngineCollisionsManager {
     const currentFrameKeys = new Set<CollisionPairKey>();
 
     for (const [entityA, entityB] of this.broadPhase()) {
-      const collidersA = this.collidersRegistry
-        .getByEntity(entityA.id)
+      const collidersA = this.componentsManager
+        .getByType(entityA.id, ColliderComponent)
         .filter((c) => c.enabled);
-      const collidersB = this.collidersRegistry
-        .getByEntity(entityB.id)
+      const collidersB = this.componentsManager
+        .getByType(entityB.id, ColliderComponent)
         .filter((c) => c.enabled);
 
       if (collidersA.length === 0 || collidersB.length === 0) {
@@ -115,8 +115,8 @@ export class EngineCollisionsManager {
     const entity = this.entitiesRegistry.get(entityId);
     if (!entity) return false;
 
-    const collidersA = this.collidersRegistry
-      .getByEntity(entityId)
+    const collidersA = this.componentsManager
+      .getByType(entityId, ColliderComponent)
       .filter((c) => c.enabled);
     if (collidersA.length === 0) return false;
 
@@ -139,8 +139,8 @@ export class EngineCollisionsManager {
     const futureEntity = { ...entity, position: futurePosition } as Entity;
 
     for (const entityB of candidates) {
-      const collidersB = this.collidersRegistry
-        .getByEntity(entityB.id)
+      const collidersB = this.componentsManager
+        .getByType(entityB.id, ColliderComponent)
         .filter((c) => c.enabled);
       if (collidersB.length === 0) continue;
 
@@ -190,8 +190,8 @@ export class EngineCollisionsManager {
   }
 
   private colliderPassesFilter(
-    colliderA: Collider,
-    colliderB: Collider,
+    colliderA: ColliderComponent,
+    colliderB: ColliderComponent,
   ): boolean {
     if (!this.collisionsRegistry.hasFilters()) {
       return true;

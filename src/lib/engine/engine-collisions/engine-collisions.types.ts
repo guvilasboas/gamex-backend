@@ -1,6 +1,6 @@
 import { Vector3 } from 'three';
 import { Entity } from '../engine-entities';
-import { Collider } from './collider';
+import { ColliderComponent } from './collider.component';
 
 export type CollisionPairKey = string;
 
@@ -18,8 +18,8 @@ export const createCollisionPairKey = (
 export type CollisionManifold = {
   entityA: Entity;
   entityB: Entity;
-  colliderA: Collider;
-  colliderB: Collider;
+  colliderA: ColliderComponent;
+  colliderB: ColliderComponent;
   overlap: Vector3;
   normal: Vector3;
   depth: number;

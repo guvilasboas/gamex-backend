@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Vector3 } from 'three';
 import { Entity } from '../../engine-entities';
-import { Collider } from '../collider';
+import { ColliderComponent } from '../collider.component';
 import { CollisionManifold } from '../engine-collisions.types';
 import { ICollisionDetector } from './collision-detector.interface';
 
@@ -9,9 +9,9 @@ import { ICollisionDetector } from './collision-detector.interface';
 export class AabbDetector implements ICollisionDetector {
   detect(
     entityA: Entity,
-    colliderA: Collider,
+    colliderA: ColliderComponent,
     entityB: Entity,
-    colliderB: Collider,
+    colliderB: ColliderComponent,
   ): CollisionManifold | null {
     const posA = colliderA.getWorldPosition(entityA.position);
     const posB = colliderB.getWorldPosition(entityB.position);

@@ -1,5 +1,4 @@
-export * from './collider';
-export * from './engine-colliders.registry';
+export * from './collider.component';
 export * from './engine-collisions.events';
 export * from './engine-collisions.manager';
 export * from './engine-collisions.module';

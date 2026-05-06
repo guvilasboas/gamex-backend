@@ -1,12 +1,12 @@
 import { Entity } from '../../engine-entities';
-import { Collider } from '../collider';
+import { ColliderComponent } from '../collider.component';
 import { CollisionManifold } from '../engine-collisions.types';
 
 export interface ICollisionDetector {
   detect(
     entityA: Entity,
-    colliderA: Collider,
+    colliderA: ColliderComponent,
     entityB: Entity,
-    colliderB: Collider,
+    colliderB: ColliderComponent,
   ): CollisionManifold | null;
 }
