@@ -2,5 +2,8 @@ export * from './engine-entities.events';
 export * from './engine-entities.module';
 export * from './engine-entities.registry';
 export * from './engine-entities.sdk';
+export * from './entity-def.decorator';
+export * from './entity-event.decorators';
 export * from './entity-factory';
 export * from './entity';
+export * from './with-component.decorator';

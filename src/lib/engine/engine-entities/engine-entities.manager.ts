@@ -10,6 +10,9 @@ import {
 } from './engine-entities.events';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { isEqual } from 'lodash';
+import { EngineEntitiesComponentsManager } from './engine-entities-components/engine-entities-components.manager';
+import { ComponentFactory } from './engine-entities-components/component-factory';
+import { GetWithComponentDefs } from './with-component.decorator';
 
 @Injectable()
 export class EngineEntitiesManager {
@@ -18,6 +21,8 @@ export class EngineEntitiesManager {
     private readonly engineEntitiesRegistry: EngineEntitiesRegistry,
     @Inject(EventEmitter2)
     private readonly eventEmitter: EventEmitter2,
+    @Inject(EngineEntitiesComponentsManager)
+    private readonly componentsManager: EngineEntitiesComponentsManager,
   ) {}
 
   /**
@@ -30,6 +35,16 @@ export class EngineEntitiesManager {
     this.engineEntitiesRegistry.add(entity);
 
     this.eventEmitter.emit(ENGINE_ENTITY_CREATED_EVENT, entity);
+
+    const componentDefs = GetWithComponentDefs(
+      entity.constructor as new (...args: any[]) => Entity,
+    );
+    for (const { componentClass, init } of componentDefs) {
+      const params = typeof init === 'function' ? init(entity) : init;
+      const component = ComponentFactory.create(componentClass, params);
+      component.entityId = entity.id;
+      this.componentsManager.add(component);
+    }
 
     return entity;
   }
