@@ -81,6 +81,10 @@ export class EngineStepper {
     return this.timer !== null;
   }
 
+  getTick(): number {
+    return this.tick;
+  }
+
   /**
    * Schedules the next tick of the game loop.
    *
