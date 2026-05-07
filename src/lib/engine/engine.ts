@@ -14,6 +14,7 @@ import {
   GAME_AFTER_RENDER_EVENT,
   GAME_RENDER_EVENT,
   GAME_BEFORE_RENDER_EVENT,
+  type EngineStepEvent,
 } from './engine.events';
 
 @Injectable()
@@ -54,13 +55,13 @@ export class Engine implements OnModuleInit, OnModuleDestroy {
    * @returns {void}
    */
   @OnEvent(ENGINE_STEP_EVENT)
-  onStep() {
-    this.eventEmitter.emit(GAME_BEFORE_UPDATE_EVENT);
-    this.eventEmitter.emit(GAME_UPDATE_EVENT);
-    this.eventEmitter.emit(GAME_AFTER_UPDATE_EVENT);
+  onStep(event: EngineStepEvent): void {
+    this.eventEmitter.emit(GAME_BEFORE_UPDATE_EVENT, event);
+    this.eventEmitter.emit(GAME_UPDATE_EVENT, event);
+    this.eventEmitter.emit(GAME_AFTER_UPDATE_EVENT, event);
 
-    this.eventEmitter.emit(GAME_BEFORE_RENDER_EVENT);
-    this.eventEmitter.emit(GAME_RENDER_EVENT);
-    this.eventEmitter.emit(GAME_AFTER_RENDER_EVENT);
+    this.eventEmitter.emit(GAME_BEFORE_RENDER_EVENT, event);
+    this.eventEmitter.emit(GAME_RENDER_EVENT, event);
+    this.eventEmitter.emit(GAME_AFTER_RENDER_EVENT, event);
   }
 }
