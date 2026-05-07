@@ -8,7 +8,11 @@ import {
   ENGINE_ENTITY_SESSION_UPDATED_EVENT,
   ENGINE_ENTITY_UPDATED_EVENT,
 } from './engine-entities.events';
-import { instanceToPlain, plainToInstance } from 'class-transformer';
+import {
+  ClassConstructor,
+  instanceToPlain,
+  plainToInstance,
+} from 'class-transformer';
 import { isEqual } from 'lodash';
 import { EngineEntitiesComponentsManager } from './engine-entities-components/engine-entities-components.manager';
 import { ComponentFactory } from './engine-entities-components/component-factory';
@@ -34,8 +38,6 @@ export class EngineEntitiesManager {
   create(entity: Entity): Entity {
     this.engineEntitiesRegistry.add(entity);
 
-    this.eventEmitter.emit(ENGINE_ENTITY_CREATED_EVENT, entity);
-
     const componentDefs = GetWithComponentDefs(
       entity.constructor as new (...args: any[]) => Entity,
     );
@@ -45,6 +47,8 @@ export class EngineEntitiesManager {
       component.entityId = entity.id;
       this.componentsManager.add(component);
     }
+
+    this.eventEmitter.emit(ENGINE_ENTITY_CREATED_EVENT, entity);
 
     return entity;
   }
@@ -103,6 +107,20 @@ export class EngineEntitiesManager {
         entity,
       );
     }
+  }
+
+  getOfType<T extends Entity = Entity>(entityClass: ClassConstructor<T>): T[] {
+    return this.engineEntitiesRegistry
+      .getAll()
+      .filter((entity) => entity instanceof entityClass)
+      .map((entity) => {
+        const plain = instanceToPlain(entity);
+        return plainToInstance(entityClass, plain) as T;
+      });
+  }
+
+  query(predicate: (entity: Entity) => boolean): Entity[] {
+    return this.engineEntitiesRegistry.getAll().filter(predicate);
   }
 
   /**

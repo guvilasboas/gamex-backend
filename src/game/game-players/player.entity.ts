@@ -11,10 +11,10 @@ import { random, uniqueId } from 'lodash';
   size: new Vector3(64, 24, 0),
   tags: ['player'],
 })
-@WithComponent(RectComponent, {
+@WithComponent(RectComponent, () => ({
   id: uniqueId('player-rect'),
   size: new Vector3(64, 96, 0),
-})
+}))
 export class Player extends Entity {
   size = new Vector3(64, 96, 0);
 
