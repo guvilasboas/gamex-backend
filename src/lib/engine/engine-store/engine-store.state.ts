@@ -57,7 +57,11 @@ export class EngineStoreState {
     const componentsMap = {};
 
     for (const { component, entity } of renderableComponents) {
-      set(componentsMap, component.id, component.getJson(entity));
+      set(
+        componentsMap,
+        `${component.entityId}_${component.id}`,
+        component.getJson(entity),
+      );
     }
 
     return componentsMap;

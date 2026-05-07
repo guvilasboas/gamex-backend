@@ -43,7 +43,7 @@ export class EngineStoreSystem {
     for (const component of components) {
       this.engineStoreManager.patch({
         type: 'set',
-        key: `components.${component.id}`,
+        key: `components.${component.entityId}_${component.id}`,
         value: component.getJson(entity),
       });
     }
@@ -81,7 +81,7 @@ export class EngineStoreSystem {
     for (const component of components) {
       this.engineStoreManager.patch({
         type: 'set',
-        key: `components.${component.id}`,
+        key: `components.${component.entityId}_${component.id}`,
         value: component.getJson(entity),
       });
     }
@@ -110,7 +110,7 @@ export class EngineStoreSystem {
     for (const component of components) {
       this.engineStoreManager.patch({
         type: 'delete',
-        key: `components.${component.id}`,
+        key: `components.${component.entityId}_${component.id}`,
       });
     }
   }

@@ -3,6 +3,7 @@ import { GamePlayersLoader } from './game-players.loader';
 import { GamePlayersSystem } from './game-players.system';
 import { GamePlayersMovementSystem } from './game-players.movement.system';
 import { GamePlayersInputCompatSystem } from './game-players.input-compat.system';
+import { GamePlayersStateMachineSystem } from './game-players.state-machine.system';
 
 @Module({
   providers: [
@@ -10,6 +11,7 @@ import { GamePlayersInputCompatSystem } from './game-players.input-compat.system
     GamePlayersSystem,
     GamePlayersMovementSystem,
     GamePlayersInputCompatSystem,
+    GamePlayersStateMachineSystem,
   ],
   exports: [GamePlayersLoader],
 })

@@ -1,5 +1,10 @@
 import { PlayerFactory } from './player.factory';
 import { Injectable } from '@nestjs/common';
+import { CreateStateMachine } from '../../lib/engine/engine-state-machine';
+import {
+  PLAYER_MOVEMENT_MACHINE_ID,
+  PLAYER_MOVEMENT_MACHINE_COMPONENT_ID,
+} from './player-movement.machine';
 
 @Injectable()
 export class GamePlayersLoader {
@@ -10,6 +15,10 @@ export class GamePlayersLoader {
    * @returns {Player} An instance of Player representing the player.
    */
   loadPlayerEntity(sessionId: string) {
-    return PlayerFactory.create(sessionId);
+    const player = PlayerFactory.create(sessionId);
+    CreateStateMachine(player.id, PLAYER_MOVEMENT_MACHINE_ID, {
+      id: PLAYER_MOVEMENT_MACHINE_COMPONENT_ID,
+    });
+    return player;
   }
 }
