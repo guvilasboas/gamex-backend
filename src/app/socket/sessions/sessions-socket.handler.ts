@@ -206,6 +206,8 @@ export class SessionsSocketHandler {
 
     const patches = this.patches.splice(0, this.patches.length);
 
+    console.log(`[DEV] Emitting ${patches.length} patches`);
+
     this.server.emit('session:patch', patches);
   }
 

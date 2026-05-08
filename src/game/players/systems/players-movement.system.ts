@@ -6,8 +6,6 @@ import { OnUpdate } from '../../../lib/engine';
 import { Player } from '../entities';
 import { Vector3 } from 'three';
 
-const INPUT_STALE_TICKS = 10;
-
 @Injectable()
 export class PlayersMovementSystem {
   constructor(
@@ -31,8 +29,7 @@ export class PlayersMovementSystem {
         continue;
       }
 
-      const isStale = this.input.isStale(player.sessionId, INPUT_STALE_TICKS);
-      const direction = this.getMovementDirection(player.sessionId, isStale);
+      const direction = this.getMovementDirection(player.sessionId);
       const isMoving = direction.lengthSq() > 0;
 
       if (isMoving) {
@@ -60,12 +57,8 @@ export class PlayersMovementSystem {
    * @param isStale - Whether the input is considered stale.
    * @returns A Vector3 representing the movement direction.
    */
-  private getMovementDirection(sessionId: string, isStale: boolean): Vector3 {
+  private getMovementDirection(sessionId: string): Vector3 {
     const direction = new Vector3(0, 0, 0);
-
-    if (isStale) {
-      return direction;
-    }
 
     if (this.input.isDown(sessionId, 'move.up')) {
       direction.y -= 1;
