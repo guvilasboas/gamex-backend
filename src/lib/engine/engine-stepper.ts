@@ -2,6 +2,8 @@ import { ENGINE_STEP_EVENT, EngineStepEvent } from './engine.events';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Inject, Injectable } from '@nestjs/common';
 
+export const ENGINE_STEP_MS = 1000 / 20;
+
 @Injectable()
 export class EngineStepper {
   /**
@@ -16,7 +18,7 @@ export class EngineStepper {
    *
    * @type {number}
    */
-  private tickMs = 1000 / 20;
+  private tickMs = ENGINE_STEP_MS;
 
   /**
    * The current tick count.
@@ -43,17 +45,15 @@ export class EngineStepper {
   ) {}
 
   /**
-   * Starts the game loop with the specified tick duration.
+   * Starts the game loop.
    *
-   * @param {number} [tickMs=1000/60] - The duration of each tick in milliseconds. Defaults to 16.67ms (60 FPS).
    * @returns {void}
    */
-  start(tickMs = 1000 / 60): void {
+  start(): void {
     if (this.timer) {
       return;
     }
 
-    this.tickMs = tickMs;
     this.lastTimestamp = Date.now();
     this.scheduleNextTick();
   }

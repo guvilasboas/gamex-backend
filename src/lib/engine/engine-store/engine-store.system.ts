@@ -1,117 +1,109 @@
+import { produceWithPatches } from 'immer';
 import {
   ENGINE_ENTITY_CREATED_EVENT,
   ENGINE_ENTITY_DELETED_EVENT,
   ENGINE_ENTITY_UPDATED_EVENT,
+  EngineEntitiesManager,
   Entity,
 } from '../engine-entities';
-import { EngineEntitiesComponentsManager } from '../engine-entities/engine-entities-components';
+import {
+  Component,
+  ENGINE_ENTITY_COMPONENT_UPDATED_EVENT,
+  EngineEntitiesComponentsManager,
+} from '../engine-entities/engine-entities-components';
+import {
+  OnAfterRender,
+  OnBeforeRender,
+  OnBeforeUpdate,
+} from '../engine-loop.decorators';
 import { IsRenderable } from '../engine-render';
-import { EngineStoreManager } from './engine-store.manager';
+import {
+  EngineStoreManager,
+  type EngineStorePatch,
+} from './engine-store.manager';
 import { Inject, Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
+import { isEqual } from 'lodash';
 
 @Injectable()
 export class EngineStoreSystem {
+  private state: Record<string, ReturnType<Component['getJson']>>;
+
   constructor(
     @Inject(EngineEntitiesComponentsManager)
     private readonly engineEntitiesComponentsManager: EngineEntitiesComponentsManager,
+    @Inject(EngineEntitiesManager)
+    private readonly engineEntitiesManager: EngineEntitiesManager,
     @Inject(EngineStoreManager)
     private readonly engineStoreManager: EngineStoreManager,
   ) {}
 
-  /**
-   * Event handler for when an engine entity is created.
-   *
-   * This method listens for the ENGINE_ENTITY_CREATED_EVENT, which is emitted whenever an entity is created.
-   * When an entity is created, it patches the engine store with the new entity data using the EngineStoreManager.
-   *
-   * @param {Entity} entity The newly created entity that triggered the event.
-   * @returns {void}
-   */
-  @OnEvent(ENGINE_ENTITY_CREATED_EVENT)
-  onEngineEntityCreated(entity: Entity) {
-    this.engineStoreManager.patch<Entity>({
-      type: 'set',
-      key: `entities.${entity.id}`,
-      value: entity,
-    });
+  @OnBeforeUpdate()
+  onBeforeUpdate() {
+    this.state = this.getState();
+  }
 
-    const components = this.engineEntitiesComponentsManager
-      .getAll(entity.id)
-      .filter(IsRenderable);
+  @OnBeforeRender()
+  onBeforeRender() {
+    const newState = this.getState();
 
-    for (const component of components) {
-      this.engineStoreManager.patch({
-        type: 'set',
-        key: `components.${component.entityId}_${component.id}`,
-        value: component.getJson(entity),
-      });
+    const patches = this.getLodashPatches(this.state, newState);
+
+    console.log('Patches:', patches);
+
+    for (const patch of patches) {
+      this.engineStoreManager.patch(patch);
     }
   }
 
-  /**
-   * Event handler for when an engine entity is updated.
-   *
-   * This method listens for the ENGINE_ENTITY_UPDATED_EVENT, which is emitted whenever an entity is updated.
-   * When an entity is updated, it patches the engine store with the updated entity data using the EngineStoreManager.
-   *
-   * @param {Entity} _ The previous state of the entity before the update (not used in this handler).
-   * @param {Entity} entity The updated entity that triggered the event.
-   * @returns {void}
-   */
-  @OnEvent(ENGINE_ENTITY_UPDATED_EVENT)
-  onEngineEntityUpdated(_: Entity, entity: Entity) {
-    this.engineStoreManager.patch<Entity>({
-      type: 'set',
-      key: `entities.${entity.id}`,
-      value: entity,
-    });
+  private getState() {
+    const state: Record<string, ReturnType<Component['getJson']>> = {};
 
-    const components = this.engineEntitiesComponentsManager
-      .getAll(entity.id)
+    const renderables = this.engineEntitiesComponentsManager
+      .getAll()
       .filter(IsRenderable);
 
-    console.log(
-      '[DEV] EngineStoreSystem.onEngineEntityUpdated - Updated entity with ID:',
-      entity.id,
-      'and its renderable components:',
-      components.map((c) => c.id),
-    );
+    for (const component of renderables) {
+      const entity = this.engineEntitiesManager.get(component.entityId);
 
-    for (const component of components) {
-      this.engineStoreManager.patch({
-        type: 'set',
-        key: `components.${component.entityId}_${component.id}`,
-        value: component.getJson(entity),
-      });
+      if (!entity) {
+        continue;
+      }
+
+      state[component.getIndex()] = component.getJson(entity);
     }
+
+    return state;
   }
 
-  /**
-   * Event handler for when an engine entity is deleted.
-   *
-   * This method listens for the ENGINE_ENTITY_DELETED_EVENT, which is emitted whenever an entity is deleted.
-   * When an entity is deleted, it patches the engine store to remove the entity data using the EngineStoreManager.
-   *
-   * @param {Entity} entity The entity that was deleted and triggered the event.
-   * @returns {void}
-   */
-  @OnEvent(ENGINE_ENTITY_DELETED_EVENT)
-  onEngineEntityDeleted(entity: Entity) {
-    this.engineStoreManager.patch<Entity>({
-      type: 'delete',
-      key: `entities.${entity.id}`,
-    });
+  private getLodashPatches(
+    oldState: Record<string, any>,
+    newState: Record<string, any>,
+  ): EngineStorePatch[] {
+    const patches: EngineStorePatch[] = [];
 
-    const components = this.engineEntitiesComponentsManager
-      .getAll(entity.id)
-      .filter(IsRenderable);
+    const allKeys = new Set([
+      ...Object.keys(oldState),
+      ...Object.keys(newState),
+    ]);
 
-    for (const component of components) {
-      this.engineStoreManager.patch({
-        type: 'delete',
-        key: `components.${component.entityId}_${component.id}`,
-      });
+    for (const key of allKeys) {
+      const oldValue = oldState[key];
+      const newValue = newState[key];
+
+      if (newValue === undefined) {
+        patches.push({ type: 'delete', key: `components.${key}` });
+      }
+
+      if (oldValue === undefined || !isEqual(oldValue, newValue)) {
+        patches.push({
+          type: 'set',
+          key: `components.${key}`,
+          value: newValue,
+        });
+      }
     }
+
+    return patches;
   }
 }

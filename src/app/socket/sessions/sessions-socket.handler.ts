@@ -11,12 +11,16 @@ import {
   ENGINE_STORE_UPDATED_EVENT,
   type EngineStorePatch,
 } from '../../../lib/engine/engine-store';
+import { OnRender } from '../../../lib/engine';
 
 const DISCONNECT_GRACE_MS = 3_000;
+const GRANCE_LOOP_PERIOD = 1;
 
 @Injectable()
 export class SessionsSocketHandler {
   server: Server;
+
+  private acc = 0;
 
   /**
    * Map to track active socket connections for each user.
@@ -39,6 +43,17 @@ export class SessionsSocketHandler {
    * @type {Map<string, NodeJS.Timeout>}
    */
   private readonly disconnectTimers: Map<string, NodeJS.Timeout> = new Map();
+
+  /**
+   * Queue to store pending engine store patches that need to be sent to clients.
+   *
+   * This queue can be used to batch multiple patches together before emitting them to clients,
+   * reducing the number of individual messages sent over the WebSocket connection.
+   *
+   * @type {EngineStorePatch[]}
+   * @private
+   */
+  private readonly patches: EngineStorePatch[] = [];
 
   constructor(
     @Inject(EngineSessionsManager)
@@ -179,7 +194,21 @@ export class SessionsSocketHandler {
    */
   @OnEvent(ENGINE_STORE_UPDATED_EVENT)
   onStoreUpdate(patch: EngineStorePatch) {
-    this.server.emit('session:patch', patch);
+    this.patches.push(patch);
+  }
+
+  @OnRender()
+  onStep() {
+    if (this.patches.length === 0 || this.acc < GRANCE_LOOP_PERIOD) {
+      this.acc += 1;
+      return;
+    }
+
+    this.acc = 0;
+
+    const patches = this.patches.splice(0, this.patches.length);
+
+    this.server.emit('session:patch', patches);
   }
 
   /**

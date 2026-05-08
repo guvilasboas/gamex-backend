@@ -87,7 +87,7 @@ export class EngineDebug {
     const entities = this.entitiesRegistry.getAll();
 
     const components = entities.flatMap((entity) =>
-      this.componentsRegistry.getAll(entity.id).map((component) => ({
+      this.componentsRegistry.getByEntity(entity.id).map((component) => ({
         component,
         entity,
       })),

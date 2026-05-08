@@ -6,12 +6,13 @@ import {
   EntityDef,
   WithComponent,
 } from '../../../lib/engine/engine-entities';
-import { RectComponent } from '../../../lib/engine/engine-render';
+import { AnimationComponent } from '../../../lib/engine/engine-render';
 import {
   PLAYER_MOVEMENT_MACHINE_COMPONENT_ID,
   PLAYER_MOVEMENT_MACHINE_ID,
   PlayerMovementState,
 } from '../machines';
+import animations from '../animations';
 
 export enum PlayerFacing {
   Up = 'up',
@@ -32,15 +33,13 @@ export enum PlayerFacing {
   definitionId: PLAYER_MOVEMENT_MACHINE_ID,
   currentState: PlayerMovementState.Idle,
 })
-@WithComponent(RectComponent, {
-  id: 'sprite',
+@WithComponent(AnimationComponent, {
+  id: 'animation',
+  resource: animations.idle[PlayerFacing.Down].resource,
+  animation: animations.idle[PlayerFacing.Down].animation,
+  playing: true,
+  frameRate: animations.idle[PlayerFacing.Down].frameRate,
   size: new Vector3(64, 96, 0),
-})
-@WithComponent(RectComponent, {
-  id: 'collider',
-  size: new Vector3(64, 24, 0),
-  strokeColor: '#00FF00',
-  offset: new Vector3(0, 72, 0),
 })
 export class Player extends Entity {
   /**
@@ -65,6 +64,13 @@ export class Player extends Entity {
   speed = 5;
 
   /**
+   * The current state of the player's movement state machine. This is used to determine the player's animation and behavior based on their movement state.
+   *
+   * @type {PlayerMovementState}
+   */
+  movementState: PlayerMovementState = PlayerMovementState.Idle;
+
+  /**
    * Set the player's facing direction based on a movement vector. This is typically called when the player moves to update their facing direction accordingly.
    *
    * @param direction - The movement vector indicating the direction of movement.
@@ -79,5 +85,41 @@ export class Player extends Entity {
     } else if (direction.y > 0) {
       this.facing = PlayerFacing.Down;
     }
+  }
+
+  /**
+   * Checks if the player is currently in the idle state.
+   *
+   * @returns {boolean} True if the player is idle, false otherwise.
+   */
+  isIdle(): boolean {
+    return this.movementState === PlayerMovementState.Idle;
+  }
+
+  /**
+   * Sets the player's movement state to idle. This is typically called when the player stops moving to update their state accordingly.
+   *
+   * @returns {void}
+   */
+  idle() {
+    this.movementState = PlayerMovementState.Idle;
+  }
+
+  /**
+   * Checks if the player is currently in the walking state.
+   *
+   * @returns {boolean} True if the player is walking, false otherwise.
+   */
+  isWalking(): boolean {
+    return this.movementState === PlayerMovementState.Walking;
+  }
+
+  /**
+   * Sets the player's movement state to walking. This is typically called when the player starts moving to update their state accordingly.
+   *
+   * @returns {void}
+   */
+  walk() {
+    this.movementState = PlayerMovementState.Walking;
   }
 }

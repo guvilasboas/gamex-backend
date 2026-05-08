@@ -1,3 +1,4 @@
+import { PLAYER_MOVEMENT_MACHINE_COMPONENT_ID } from '../machines/player-movement.machine';
 import { EngineStateMachineManager } from '../../../lib/engine/engine-state-machine';
 import { EngineCollisionsManager } from '../../../lib/engine/engine-collisions';
 import { EngineEntitiesManager } from '../../../lib/engine/engine-entities';
@@ -38,13 +39,8 @@ export class PlayersMovementSystem {
       const direction = this.getMovementDirection(player.sessionId, isStale);
       const isMoving = direction.lengthSq() > 0;
 
-      this.stateMachineManager.requestTransition(
-        player.id,
-        'player_movement_machine',
-        isMoving ? 'start_walking' : 'stop_walking',
-      );
-
       if (isMoving) {
+        player.walk();
         player.setFacingByDirection(direction);
 
         const delta = direction.multiplyScalar(player.speed);
@@ -53,6 +49,8 @@ export class PlayersMovementSystem {
         if (!this.collisionsManager.wouldCollideAt(player.id, futurePosition)) {
           player.move(delta);
         }
+      } else {
+        player.idle();
       }
 
       this.entities.update(player);

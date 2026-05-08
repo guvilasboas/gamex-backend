@@ -1,15 +1,24 @@
+import { RegisterStateMachine } from '../../lib/engine/engine-state-machine';
+import { PlayerMovementMachineDefinition } from './machines';
 import { PlayerFactoryService, PlayerLoaderService } from './services';
-import { PlayersMovementSystem } from './systems/players-movement.system';
-import { PlayersSessionSystem, PlayersStateMachineSystem } from './systems';
+import {
+  PlayersAnimationSystem,
+  PlayersMovementSystem,
+  PlayersSessionSystem,
+} from './systems';
 import { Module } from '@nestjs/common';
 
 @Module({
   providers: [
-    PlayerLoaderService,
-    PlayerFactoryService,
-    PlayersSessionSystem,
-    PlayersStateMachineSystem,
+    PlayersAnimationSystem,
     PlayersMovementSystem,
+    PlayersSessionSystem,
+    PlayerFactoryService,
+    PlayerLoaderService,
   ],
 })
-export class PlayersModule {}
+export class PlayersModule {
+  onModuleInit() {
+    RegisterStateMachine(PlayerMovementMachineDefinition);
+  }
+}

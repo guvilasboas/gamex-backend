@@ -148,6 +148,15 @@ export abstract class Component {
   }
 
   /**
+   * Get component index used for storing in the registry, based on entity ID and component ID.
+   *
+   * @returns {string} The component index in the format `${entityId}_${componentId}`.
+   */
+  getIndex() {
+    return `${this.entityId}_${this.id}`;
+  }
+
+  /**
    * Serializes the component to a JSON-friendly format, including the world position of the collider.
    *
    * @param {Entity} entity - The entity this component belongs to, used to calculate the world position.
@@ -156,7 +165,7 @@ export abstract class Component {
   getJson(entity: Entity) {
     return {
       ...instanceToPlain(this),
-      position: this.getWorldPosition(entity.position),
+      position: instanceToPlain(this.getWorldPosition(entity.position)),
     };
   }
 }

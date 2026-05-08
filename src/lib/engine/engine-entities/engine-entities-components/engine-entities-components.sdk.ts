@@ -2,6 +2,7 @@ import { Container } from '../../../../common/container';
 import { EngineEntitiesComponentsManager } from './engine-entities-components.manager';
 import { Component } from './component';
 import { ComponentFactory } from './component-factory';
+import { DeepPartial } from 'typeorm';
 
 // ─── Core management ─────────────────────────────────────────────────────────
 
@@ -67,7 +68,7 @@ export function GetAllComponents(entityId: string): Component[] {
   const manager = Container.get<EngineEntitiesComponentsManager>(
     EngineEntitiesComponentsManager,
   );
-  return manager.getAll(entityId);
+  return manager.getByEntity(entityId);
 }
 
 /**
@@ -124,16 +125,14 @@ export function AttachComponent<T extends Component>(
  * @example
  * PatchComponent(entity.id, 'health', { current: health.current - 10 });
  */
-export function PatchComponent(
+export function PatchComponent<T extends Component>(
   entityId: string,
   componentId: string,
-  changes: Record<string, unknown>,
+  changes: DeepPartial<T>,
 ): void {
   const manager = Container.get<EngineEntitiesComponentsManager>(
     EngineEntitiesComponentsManager,
   );
-  const existing = manager.get(entityId, componentId);
-  if (!existing) return;
-  Object.assign(existing, changes);
-  manager.add(existing);
+
+  return manager.patch<T>(entityId, componentId, changes);
 }

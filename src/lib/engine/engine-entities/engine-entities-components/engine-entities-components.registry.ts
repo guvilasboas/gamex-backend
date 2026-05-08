@@ -61,14 +61,18 @@ export class EngineEntitiesComponentsRegistry {
     return list.filter((c): c is T => c instanceof componentClass);
   }
 
+  getByEntity(entityId: string): Component[] {
+    return this.components.get(entityId) ?? [];
+  }
+
   /**
    * Returns all components on an entity.
    *
    * @param {string} entityId The ID of the entity to retrieve components for.
    * @returns {Component[]} Array of all components on the entity, or an empty array if none exist.
    */
-  getAll(entityId: string): Component[] {
-    return this.components.get(entityId) ?? [];
+  getAll(): Component[] {
+    return Array.from(this.components.values()).flat();
   }
 
   /**

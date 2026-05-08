@@ -7,6 +7,8 @@ import {
   ENGINE_ENTITY_COMPONENT_REMOVED_EVENT,
   ENGINE_ENTITY_COMPONENT_UPDATED_EVENT,
 } from './engine-entities-components.events';
+import { DeepPartial } from 'typeorm';
+import { ClassConstructor, plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class EngineEntitiesComponentsManager {
@@ -29,10 +31,7 @@ export class EngineEntitiesComponentsManager {
     this.registry.add(component);
 
     if (existing) {
-      this.eventEmitter.emit(ENGINE_ENTITY_COMPONENT_UPDATED_EVENT, {
-        previous: existing,
-        next: component,
-      });
+      this.eventEmitter.emit(ENGINE_ENTITY_COMPONENT_UPDATED_EVENT, component);
     } else {
       this.eventEmitter.emit(ENGINE_ENTITY_COMPONENT_ADDED_EVENT, component);
     }
@@ -45,8 +44,11 @@ export class EngineEntitiesComponentsManager {
    * @param {string} componentId - The ID of the component to retrieve.
    * @returns {Component | undefined} The component instance if found, or undefined if not found.
    */
-  get(entityId: string, componentId: string): Component | undefined {
-    return this.registry.get(entityId, componentId);
+  get<T extends Component>(
+    entityId: string,
+    componentId: string,
+  ): T | undefined {
+    return this.registry.get(entityId, componentId) as T | undefined;
   }
 
   /**
@@ -63,14 +65,18 @@ export class EngineEntitiesComponentsManager {
     return this.registry.getByType(entityId, componentClass);
   }
 
+  getByEntity(entityId: string): Component[] {
+    return this.registry.getByEntity(entityId);
+  }
+
   /**
    * Returns all components on an entity.
    *
    * @param {string} entityId - The ID of the entity to retrieve components for.
    * @returns {Component[]} Array of all components on the entity, or an empty array if none exist.
    */
-  getAll(entityId: string): Component[] {
-    return this.registry.getAll(entityId);
+  getAll(): Component[] {
+    return this.registry.getAll();
   }
 
   /**
@@ -114,5 +120,40 @@ export class EngineEntitiesComponentsManager {
     for (const component of removed) {
       this.eventEmitter.emit(ENGINE_ENTITY_COMPONENT_REMOVED_EVENT, component);
     }
+  }
+
+  /**
+   * Updates a component's properties by component id.
+   * Only the provided properties in `changes` are updated, other properties remain unchanged.
+   * Emits ENGINE_ENTITY_COMPONENT_UPDATED_EVENT with previous and next instances.
+   *
+   * @param {string} entityId - The ID of the entity the component belongs to.
+   * @param {string} componentId - The ID of the component to patch.
+   * @param {DeepPartial<T>} changes - An object containing the properties to update and their new values.
+   */
+  patch<T extends Component>(
+    entityId: string,
+    componentId: string,
+    changes: DeepPartial<T>,
+  ): void {
+    const component = this.registry.get(entityId, componentId);
+    if (!component) {
+      return;
+    }
+
+    const patchedComponent = plainToInstance(
+      component.constructor as ClassConstructor<Component>,
+      {
+        ...component,
+        ...changes,
+      },
+    );
+
+    this.registry.add(patchedComponent);
+
+    this.eventEmitter.emit(
+      ENGINE_ENTITY_COMPONENT_UPDATED_EVENT,
+      patchedComponent,
+    );
   }
 }

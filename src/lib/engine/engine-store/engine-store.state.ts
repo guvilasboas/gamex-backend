@@ -43,7 +43,7 @@ export class EngineStoreState {
 
     const components = entities.flatMap((entity) =>
       this.engineEntitiesComponentsManager
-        .getAll(entity.id)
+        .getByEntity(entity.id)
         .map((component) => ({
           component,
           entity,

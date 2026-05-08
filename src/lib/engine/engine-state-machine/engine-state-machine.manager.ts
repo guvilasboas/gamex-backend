@@ -25,7 +25,6 @@ import { StateMachineComponent } from './state-machine.component';
 import {
   StateId,
   StateMachineBlockedPayload,
-  StateMachineDefinition,
   StateMachineEventEntitySnapshot,
   StateMachineIntent,
   StateMachineLifecyclePayload,
