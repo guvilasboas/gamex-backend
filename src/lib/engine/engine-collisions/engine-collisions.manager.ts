@@ -131,9 +131,7 @@ export class EngineCollisionsManager {
     const candidates = Array.from(entityIds)
       .filter((id) => id !== entityId)
       .map((id) => this.entitiesRegistry.get(id))
-      .filter(
-        (e): e is Entity => e !== undefined && e.tags.includes('collidable'),
-      );
+      .filter((e): e is Entity => e !== undefined);
 
     // Simulate the entity at its future position without mutating the real object
     const futureEntity = { ...entity, position: futurePosition } as Entity;
@@ -171,9 +169,7 @@ export class EngineCollisionsManager {
 
       const entities = Array.from(entityIds)
         .map((id) => this.entitiesRegistry.get(id))
-        .filter(
-          (e): e is Entity => e !== undefined && e.tags.includes('collidable'),
-        );
+        .filter((e): e is Entity => e !== undefined);
 
       for (let i = 0; i < entities.length; i++) {
         for (let j = i + 1; j < entities.length; j++) {

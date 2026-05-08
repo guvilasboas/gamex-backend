@@ -7,3 +7,4 @@ export * from './entity-event.decorators';
 export * from './entity-factory';
 export * from './entity';
 export * from './with-component.decorator';
+export * from './engine-entities.manager';

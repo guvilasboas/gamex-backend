@@ -35,7 +35,7 @@ export class EngineEntitiesManager {
    * @param entity - The entity to register.
    * @returns The registered entity.
    */
-  create(entity: Entity): Entity {
+  create<T extends Entity = Entity>(entity: T): T {
     this.engineEntitiesRegistry.add(entity);
 
     const componentDefs = GetWithComponentDefs(
@@ -86,6 +86,11 @@ export class EngineEntitiesManager {
     return plainToInstance(entity.constructor as new () => T, plain) as T;
   }
 
+  /**
+   * Updates an existing entity in the engine.
+   *
+   * @param entity - The entity with updated data.
+   */
   update(entity: Entity): void {
     const previousEntity = this.engineEntitiesRegistry.get(entity.id);
     if (!previousEntity) {
@@ -109,6 +114,12 @@ export class EngineEntitiesManager {
     }
   }
 
+  /**
+   * Retrieves all entities of a specific type.
+   *
+   * @param entityClass - The class of the entities to retrieve.
+   * @returns An array of entities of the specified type.
+   */
   getOfType<T extends Entity = Entity>(entityClass: ClassConstructor<T>): T[] {
     return this.engineEntitiesRegistry
       .getAll()

@@ -35,6 +35,7 @@ import {
   TransitionApplyResult,
   TransitionId,
 } from './engine-state-machine.types';
+import { EngineStepper } from '../engine-stepper';
 
 @Injectable()
 export class EngineStateMachineManager {
@@ -53,13 +54,14 @@ export class EngineStateMachineManager {
     private readonly activeIndex: EngineStateMachineActiveIndex,
     @Inject(EventEmitter2)
     private readonly eventEmitter: EventEmitter2,
+    @Inject(EngineStepper)
+    private readonly stepper: EngineStepper,
   ) {}
 
   create<TContext>(
     entityId: string,
     definitionId: string,
     params: { id: string; context?: TContext },
-    tick: number,
   ): StateMachineComponent<TContext> {
     const entity = this.entitiesRegistry.get(entityId);
     if (!entity) {
@@ -79,7 +81,7 @@ export class EngineStateMachineManager {
       definitionId,
       currentState: definition.initialState,
       previousState: undefined,
-      stateEnteredAt: tick,
+      stateEnteredAt: this.stepper.getTick(),
       context: (params.context ?? {}) as TContext,
       suspended: false,
       revision: 0,
@@ -95,7 +97,7 @@ export class EngineStateMachineManager {
         undefined,
         machine.currentState,
         undefined,
-        tick,
+        this.stepper.getTick(),
       ),
     );
 
@@ -106,14 +108,13 @@ export class EngineStateMachineManager {
     entityId: string,
     machineId: string,
     transitionId: TransitionId,
-    tick: number,
   ): TransitionApplyResult {
     const intent: StateMachineIntent = {
       kind: 'transition',
       entityId,
       machineId,
       transitionId,
-      tick,
+      tick: this.stepper.getTick(),
     };
 
     this.queue.enqueue(intent);
@@ -133,14 +134,13 @@ export class EngineStateMachineManager {
     entityId: string,
     machineId: string,
     nextState: StateId,
-    tick: number,
   ): TransitionApplyResult {
     const intent: StateMachineIntent = {
       kind: 'force',
       entityId,
       machineId,
       nextState,
-      tick,
+      tick: this.stepper.getTick(),
     };
 
     this.queue.enqueue(intent);

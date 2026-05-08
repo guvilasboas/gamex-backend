@@ -1,8 +1,7 @@
-import { Container } from '../../../common/container';
-import { EngineStepper } from '../engine-stepper';
 import { EngineStateMachineDefinitionsRegistry } from './engine-state-machine-definitions.registry';
 import { EngineStateMachineManager } from './engine-state-machine.manager';
 import { StateMachineComponent } from './state-machine.component';
+import { Container } from '../../../common/container';
 import {
   StateId,
   StateMachineDefinition,
@@ -28,9 +27,8 @@ export function CreateStateMachine<TContext>(
   const manager = Container.get<EngineStateMachineManager>(
     EngineStateMachineManager,
   );
-  const stepper = Container.get<EngineStepper>(EngineStepper);
 
-  return manager.create(entityId, definitionId, params, stepper.getTick());
+  return manager.create(entityId, definitionId, params);
 }
 
 export function RequestTransition(
@@ -41,14 +39,8 @@ export function RequestTransition(
   const manager = Container.get<EngineStateMachineManager>(
     EngineStateMachineManager,
   );
-  const stepper = Container.get<EngineStepper>(EngineStepper);
 
-  return manager.requestTransition(
-    entityId,
-    machineId,
-    transitionId,
-    stepper.getTick(),
-  );
+  return manager.requestTransition(entityId, machineId, transitionId);
 }
 
 export function Transition(
@@ -68,9 +60,8 @@ export function ForceState(
   const manager = Container.get<EngineStateMachineManager>(
     EngineStateMachineManager,
   );
-  const stepper = Container.get<EngineStepper>(EngineStepper);
 
-  return manager.forceState(entityId, machineId, nextState, stepper.getTick());
+  return manager.forceState(entityId, machineId, nextState);
 }
 
 export function SuspendStateMachine(
