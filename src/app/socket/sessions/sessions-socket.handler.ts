@@ -124,11 +124,9 @@ export class SessionsSocketHandler {
     connections.add(socketId);
     this.activeConnections.set(userId, connections);
 
-    if (!wasOffline) {
-      return;
+    if (wasOffline) {
+      this.sessionsManager.connect(session);
     }
-
-    this.sessionsManager.connect(session);
 
     client.emit('session:init', this.storeState.getSnapshot());
   }

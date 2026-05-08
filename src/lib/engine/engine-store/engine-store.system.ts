@@ -1,33 +1,20 @@
-import { produceWithPatches } from 'immer';
-import {
-  ENGINE_ENTITY_CREATED_EVENT,
-  ENGINE_ENTITY_DELETED_EVENT,
-  ENGINE_ENTITY_UPDATED_EVENT,
-  EngineEntitiesManager,
-  Entity,
-} from '../engine-entities';
+import { EngineEntitiesManager } from '../engine-entities';
 import {
   Component,
-  ENGINE_ENTITY_COMPONENT_UPDATED_EVENT,
   EngineEntitiesComponentsManager,
 } from '../engine-entities/engine-entities-components';
-import {
-  OnAfterRender,
-  OnBeforeRender,
-  OnBeforeUpdate,
-} from '../engine-loop.decorators';
+import { OnBeforeRender, OnBeforeUpdate } from '../engine-loop.decorators';
 import { IsRenderable } from '../engine-render';
 import {
   EngineStoreManager,
   type EngineStorePatch,
 } from './engine-store.manager';
 import { Inject, Injectable } from '@nestjs/common';
-import { OnEvent } from '@nestjs/event-emitter';
 import { isEqual } from 'lodash';
 
 @Injectable()
 export class EngineStoreSystem {
-  private state: Record<string, ReturnType<Component['getJson']>>;
+  private state: Record<string, ReturnType<Component['getJson']>> = {};
 
   constructor(
     @Inject(EngineEntitiesComponentsManager)
@@ -49,7 +36,9 @@ export class EngineStoreSystem {
 
     const patches = this.getLodashPatches(this.state, newState);
 
-    console.log('Patches:', patches);
+    if (patches.length === 0) {
+      return;
+    }
 
     for (const patch of patches) {
       this.engineStoreManager.patch(patch);
@@ -93,6 +82,7 @@ export class EngineStoreSystem {
 
       if (newValue === undefined) {
         patches.push({ type: 'delete', key: `components.${key}` });
+        continue;
       }
 
       if (oldValue === undefined || !isEqual(oldValue, newValue)) {

@@ -49,7 +49,5 @@ export class PlayersAnimationSystem {
         frameRate: newAnimation.frameRate,
       },
     );
-
-    this.engineEntitiesManager.update(player);
   }
 }

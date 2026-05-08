@@ -1,5 +1,3 @@
-import { PLAYER_MOVEMENT_MACHINE_COMPONENT_ID } from '../machines/player-movement.machine';
-import { EngineStateMachineManager } from '../../../lib/engine/engine-state-machine';
 import { EngineCollisionsManager } from '../../../lib/engine/engine-collisions';
 import { EngineEntitiesManager } from '../../../lib/engine/engine-entities';
 import { EngineInputManager } from '../../../lib/engine/engine-input';
@@ -13,8 +11,6 @@ const INPUT_STALE_TICKS = 10;
 @Injectable()
 export class PlayersMovementSystem {
   constructor(
-    @Inject(EngineStateMachineManager)
-    private readonly stateMachineManager: EngineStateMachineManager,
     @Inject(EngineCollisionsManager)
     private readonly collisionsManager: EngineCollisionsManager,
     @Inject(EngineEntitiesManager)
