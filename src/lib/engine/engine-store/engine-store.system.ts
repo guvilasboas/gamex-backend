@@ -1,6 +1,8 @@
+import { OnEvent } from '@nestjs/event-emitter';
 import { EngineEntitiesManager } from '../engine-entities';
 import {
   Component,
+  ENGINE_ENTITY_COMPONENT_REMOVED_EVENT,
   EngineEntitiesComponentsManager,
 } from '../engine-entities/engine-entities-components';
 import { OnBeforeRender, OnBeforeUpdate } from '../engine-loop.decorators';
@@ -79,8 +81,9 @@ export class EngineStoreSystem {
     for (const key of allKeys) {
       const oldValue = oldState[key];
       const newValue = newState[key];
-
       if (newValue === undefined) {
+        console.log(`[DEV] Key ${key} was removed`);
+
         patches.push({ type: 'delete', key: `components.${key}` });
         continue;
       }
@@ -95,5 +98,13 @@ export class EngineStoreSystem {
     }
 
     return patches;
+  }
+
+  @OnEvent(ENGINE_ENTITY_COMPONENT_REMOVED_EVENT)
+  onEntityComponentRemoved(component: Component) {
+    this.engineStoreManager.patch({
+      type: 'delete',
+      key: `components.${component.getIndex()}`,
+    });
   }
 }
