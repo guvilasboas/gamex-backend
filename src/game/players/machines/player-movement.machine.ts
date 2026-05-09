@@ -6,6 +6,7 @@ export const PLAYER_MOVEMENT_MACHINE_COMPONENT_ID = 'movement';
 export enum PlayerMovementState {
   Idle = 'idle',
   Walking = 'walking',
+  Running = 'running',
 }
 
 export const PlayerMovementMachineDefinition: StateMachineDefinition = {

@@ -64,6 +64,13 @@ export class Player extends Entity {
   speed = 5;
 
   /**
+   * The speed at which the player moves when running. This is used to calculate movement deltas based on input when the player is running.
+   *
+   * @type {number}
+   */
+  runningSpeed = 15;
+
+  /**
    * The current state of the player's movement state machine. This is used to determine the player's animation and behavior based on their movement state.
    *
    * @type {PlayerMovementState}
@@ -121,5 +128,23 @@ export class Player extends Entity {
    */
   walk() {
     this.movementState = PlayerMovementState.Walking;
+  }
+
+  /**
+   * Checks if the player is currently in the running state.
+   *
+   * @returns {boolean} True if the player is running, false otherwise.
+   */
+  isRunning(): boolean {
+    return this.movementState === PlayerMovementState.Running;
+  }
+
+  /**
+   * Sets the player's movement state to running. This is typically called when the player starts running to update their state accordingly.
+   *
+   * @returns {void}
+   */
+  run() {
+    this.movementState = PlayerMovementState.Running;
   }
 }

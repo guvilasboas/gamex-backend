@@ -29,14 +29,23 @@ export class PlayersMovementSystem {
         continue;
       }
 
-      const direction = this.getMovementDirection(player.sessionId);
+      const isStale = this.input.isStale(player.sessionId, 1);
+      const direction = this.getMovementDirection(player.sessionId, isStale);
       const isMoving = direction.lengthSq() > 0;
 
       if (isMoving) {
-        player.walk();
+        const isShiftPressed = this.input.isDown(
+          player.sessionId,
+          'move.shift',
+        );
+
+        const speed = isShiftPressed ? player.runningSpeed : player.speed;
+
+        isShiftPressed ? player.run() : player.walk();
+
         player.setFacingByDirection(direction);
 
-        const delta = direction.multiplyScalar(player.speed);
+        const delta = direction.multiplyScalar(speed);
         const futurePosition = player.position.clone().add(delta);
 
         if (!this.collisionsManager.wouldCollideAt(player.id, futurePosition)) {
@@ -57,8 +66,12 @@ export class PlayersMovementSystem {
    * @param isStale - Whether the input is considered stale.
    * @returns A Vector3 representing the movement direction.
    */
-  private getMovementDirection(sessionId: string): Vector3 {
+  private getMovementDirection(sessionId: string, isStale: boolean): Vector3 {
     const direction = new Vector3(0, 0, 0);
+
+    if (isStale) {
+      return direction;
+    }
 
     if (this.input.isDown(sessionId, 'move.up')) {
       direction.y -= 1;
