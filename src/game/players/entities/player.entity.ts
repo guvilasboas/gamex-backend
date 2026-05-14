@@ -13,6 +13,7 @@ import {
   PlayerMovementState,
 } from '../machines';
 import animations from '../animations';
+import { Sync } from '../../../lib/engine';
 
 export enum PlayerFacing {
   Up = 'up',
@@ -69,6 +70,20 @@ export class Player extends Entity {
    * @type {number}
    */
   runningSpeed = 15;
+
+  /**
+   * The player's current health points (HP). This is used to determine if the player is alive or dead and can be modified by taking damage or healing.
+   *
+   * @type {number}
+   */
+  health = 100;
+
+  /**
+   * The player's maximum health points (HP). This is used to determine the maximum HP the player can have and can be modified by leveling up or equipping certain items.
+   *
+   * @type {number}
+   */
+  maxHealth = 100;
 
   /**
    * The current state of the player's movement state machine. This is used to determine the player's animation and behavior based on their movement state.
